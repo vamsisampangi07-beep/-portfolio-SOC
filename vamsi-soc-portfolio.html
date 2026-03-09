@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vamsi Sampangi — SOC Analyst</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05070a;
+    --surface: #0a0e14;
+    --surface2: #0f1520;
+    --red: #ff3a3a;
+    --orange: #ff7a1a;
+    --yellow: #ffd166;
+    --text: #dce8f0;
+    --muted: #5a7080;
+    --border: #152030;
+    --glow-red: 0 0 40px rgba(255,58,58,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── SCANLINE OVERLAY ─── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 9999;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.03) 0px,
+      rgba(0,0,0,0.03) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 6vw;
+    background: rgba(5,7,10,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--red);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+  .nav-logo span { color: var(--muted); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--red); }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 6vw 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 30%, rgba(255,58,58,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,122,26,0.05) 0%, transparent 60%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,58,58,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,58,58,0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  .hero-ticker {
+    position: absolute; top: 100px; left: 0; right: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    opacity: 0.4;
+    white-space: nowrap;
+    animation: ticker 20s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes ticker {
+    from { transform: translateX(100vw); }
+    to { transform: translateX(-200%); }
+  }
+  .hero-status {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards 0.2s;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.4s;
+  }
+  h1 .outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--red);
+  }
+  h1 .dim { color: var(--border); -webkit-text-stroke: 1.5px var(--border); }
+
+  .hero-sub {
+    max-width: 600px;
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.6s;
+  }
+  .hero-sub strong { color: var(--text); font-weight: 500; }
+
+  .hero-cta {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.8s;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary:hover { background: #ff5555; box-shadow: 0 0 24px rgba(255,58,58,0.4); transform: translateY(-2px); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--red); color: var(--red); transform: translateY(-2px); }
+
+  .hero-metrics {
+    position: absolute; right: 6vw; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 1.5rem;
+    opacity: 0;
+    animation: fadeLeft 0.7s ease forwards 1s;
+  }
+  @keyframes fadeLeft { from{opacity:0;transform:translateX(30px) translateY(-50%);} to{opacity:1;transform:translateX(0) translateY(-50%);} }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--red);
+    padding: 1.25rem 1.5rem;
+    min-width: 180px;
+  }
+  .metric-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--red);
+    line-height: 1;
+  }
+  .metric-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SECTIONS ─── */
+  section { padding: 100px 6vw; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
+  }
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    margin-bottom: 3rem;
+  }
+
+  /* ─── SKILLS ─── */
+  #skills { border-top: 1px solid var(--border); }
+  .skills-mega {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .skill-block {
+    background: var(--surface);
+    padding: 2rem;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .skill-block:hover { background: var(--surface2); }
+  .skill-block::after {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--red);
+    transition: height 0.3s;
+  }
+  .skill-block:hover::after { height: 100%; }
+  .skill-block-cat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .skill-block h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+  .skill-block p { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+
+  /* ─── CERTS ─── */
+  #certs { border-top: 1px solid var(--border); background: var(--surface); }
+  .certs-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+  .cert-pill {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  .cert-pill:hover { border-color: var(--red); box-shadow: var(--glow-red); }
+  .cert-icon { font-size: 1.1rem; }
+  .cert-name { font-size: 0.82rem; font-weight: 600; }
+  .cert-issuer { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+  .cert-progress { border-color: rgba(255,209,102,0.3); }
+  .cert-progress .cert-name { color: var(--yellow); }
+
+  /* ─── EXPERIENCE ─── */
+  #experience { border-top: 1px solid var(--border); }
+  .exp-item {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 3rem;
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .exp-item:first-child { padding-top: 0; }
+  .exp-period {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--red);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .exp-company {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 0.2rem;
+  }
+  .exp-loc { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+  .exp-content h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); font-style: italic; }
+  .exp-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .exp-bullets li {
+    font-size: 0.83rem; color: var(--muted);
+    padding-left: 1.5rem; position: relative; line-height: 1.6;
+  }
+  .exp-bullets li::before {
+    content: '>';
+    position: absolute; left: 0;
+    color: var(--red);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+  }
+  .exp-bullets li strong { color: var(--yellow); font-weight: 500; }
+  .exp-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
+  .tag {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tag:hover { border-color: var(--red); color: var(--red); }
+
+  /* ─── PROJECTS ─── */
+  #projects { border-top: 1px solid var(--border); background: var(--surface); }
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .project-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.75rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), var(--orange));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .project-card:hover { border-color: rgba(255,58,58,0.3); transform: translateY(-4px); box-shadow: var(--glow-red); }
+  .project-card:hover::before { transform: scaleX(1); }
+  .project-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .project-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .project-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+  .project-stack { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+  /* ─── EDUCATION ─── */
+  #education { border-top: 1px solid var(--border); }
+  .edu-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem; }
+  .edu-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--red);
+    padding: 2rem;
+    transition: all 0.3s;
+  }
+  .edu-card:hover { box-shadow: var(--glow-red); }
+  .edu-degree { font-style: italic; color: var(--muted); font-size: 0.85rem; margin-bottom: 0.4rem; }
+  .edu-school { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 0.2rem; }
+  .edu-field { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--red); }
+
+  .coursework-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem; color: var(--muted);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .course-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .course-chip {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 0.75rem; color: var(--muted);
+    transition: all 0.2s;
+  }
+  .course-chip:hover { border-color: var(--red); color: var(--text); }
+
+  /* ─── CONTACT ─── */
+  #contact { border-top: 1px solid var(--border); background: var(--surface); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+  .contact-lead { font-size: 1rem; color: var(--muted); line-height: 1.8; margin-bottom: 2rem; }
+  .contact-lead strong { color: var(--text); }
+  .contact-links { display: flex; flex-direction: column; gap: 0.75rem; }
+  .contact-link {
+    display: flex; align-items: center; gap: 1rem;
+    text-decoration: none; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.9rem 1.25rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  .contact-link:hover { border-color: var(--red); color: var(--red); transform: translateX(6px); }
+  .contact-link-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 1.75rem 6vw;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--muted);
+  }
+  .footer-sig { color: var(--red); }
+
+  /* ─── REVEAL ─── */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    section { padding: 70px 5vw; }
+    .exp-item { grid-template-columns: 1fr; gap: 0.5rem; }
+    .contact-grid, .edu-wrap { grid-template-columns: 1fr; gap: 2rem; }
+    .hero-metrics { display: none; }
+    .nav-links { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">VS<span>://SOC</span></a>
+  <ul class="nav-links">
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-ticker">THREAT DETECTION · INCIDENT RESPONSE · SIEM · EDR · CLOUD SECURITY · MITRE ATT&CK · FORENSICS · PLAYBOOK AUTOMATION · SOC OPERATIONS · THREAT HUNTING · </div>
+
+  <div class="hero-metrics">
+    <div class="metric">
+      <div class="metric-num">40%</div>
+      <div class="metric-label">MTTR Reduction</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">30%</div>
+      <div class="metric-label">False Positive Reduction</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">2K+</div>
+      <div class="metric-label">Endpoints Protected</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">15+</div>
+      <div class="metric-label">MITRE ATT&CK Rules</div>
+    </div>
+  </div>
+
+  <div class="hero-status">
+    <div class="dot"></div>
+    Available for New Opportunities
+  </div>
+  <h1>Threat<br><span class="outline">Hunter.</span><br><span class="dim">SOC</span> Analyst.</h1>
+  <p class="hero-sub">
+    I'm <strong>Vamsi Sampangi</strong> — SOC Analyst & SIEM Specialist with 3+ years defending enterprise environments through threat detection, incident response, and security automation. Currently at <strong>Citigroup</strong>.
+  </p>
+  <div class="hero-cta">
+    <a href="#experience" class="btn btn-primary">View Experience ↓</a>
+    <a href="mailto:vamsisampangi@gmail.com" class="btn btn-ghost">Get in Touch</a>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">// Technical Arsenal</div>
+  <h2>Built for the<br>SOC Trenches</h2>
+  <div class="skills-mega reveal">
+    <div class="skill-block">
+      <div class="skill-block-cat">SIEM</div>
+      <h3>Detection Platforms</h3>
+      <p>Splunk, Microsoft Sentinel, Elastic Stack, IBM QRadar, Sumo Logic — advanced correlation rule engineering across all major platforms.</p>
+    </div>
+    <div class="skill-block">
+      <div class="skill-block-cat">EDR/XDR</div>
+      <h3>Endpoint Defense</h3>
+      <p>CrowdStrike Falcon, SentinelOne, Microsoft Defender, FireEye HX — full endpoint lifecycle, threat hunting, and malware containment.</p>
+    </div>
+    <div class="skill-block">
+      <div class="skill-block-cat">Cloud</div>
+      <h3>Cloud Security</h3>
+      <p>AWS GuardDuty, CSPM (Prisma, Wiz), AWS IAM & S3 — cloud posture assessments, misconfiguration remediation, hybrid SIEM integration.</p>
+    </div>
+    <div class="skill-block">
+      <div class="skill-block-cat">Automation</div>
+      <h3>Scripting & SOAR</h3>
+      <p>Python, PowerShell, Bash, YaRA — automated playbooks in Splunk SOAR, IBM Resilient, and Cortex XSOAR. IOC enrichment pipelines.</p>
+    </div>
+    <div class="skill-block">
+      <div class="skill-block-cat">Detection</div>
+      <h3>IDS/IPS & Network</h3>
+      <p>Snort, Suricata, Zeek, Security Onion — fine-tuning intrusion rules, reducing alert fatigue, deep packet analysis and traffic monitoring.</p>
+    </div>
+    <div class="skill-block">
+      <div class="skill-block-cat">Forensics</div>
+      <h3>Malware Analysis</h3>
+      <p>Ghidra, Cuckoo Sandbox, Volatility, Autopsy — rapid reverse engineering, memory forensics, IOC extraction, and threat containment.</p>
+    </div>
+    <div class="skill-block">
+      <div class="skill-block-cat">Frameworks</div>
+      <h3>Security Frameworks</h3>
+      <p>MITRE ATT&CK, NIST CSF, ISO 27001 — aligning detection rules to adversary TTPs, compliance readiness, and audit support.</p>
+    </div>
+    <div class="skill-block">
+      <div class="skill-block-cat">Vuln Mgmt</div>
+      <h3>Vulnerability Management</h3>
+      <p>Nessus, OpenVAS, Qualys — scanning, remediation tracking, CVE prioritization, and 100% critical patch compliance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CERTS -->
+<section id="certs">
+  <div class="section-label">// Credentials</div>
+  <h2>Certifications</h2>
+  <div class="certs-row reveal">
+    <div class="cert-pill">
+      <div class="cert-icon">🛡️</div>
+      <div>
+        <div class="cert-name">CompTIA Security+</div>
+        <div class="cert-issuer">CompTIA · 2023</div>
+      </div>
+    </div>
+    <div class="cert-pill">
+      <div class="cert-icon">🧪</div>
+      <div>
+        <div class="cert-name">eJPT</div>
+        <div class="cert-issuer">eLearnSecurity · 2024</div>
+      </div>
+    </div>
+    <div class="cert-pill">
+      <div class="cert-icon">📊</div>
+      <div>
+        <div class="cert-name">Splunk Core Certified User</div>
+        <div class="cert-issuer">Splunk · 2024</div>
+      </div>
+    </div>
+    <div class="cert-pill cert-progress">
+      <div class="cert-icon">⏳</div>
+      <div>
+        <div class="cert-name">CySA+ — In Progress</div>
+        <div class="cert-issuer">CompTIA</div>
+      </div>
+    </div>
+    <div class="cert-pill cert-progress">
+      <div class="cert-icon">⏳</div>
+      <div>
+        <div class="cert-name">AWS Security Specialty — In Progress</div>
+        <div class="cert-issuer">Amazon Web Services</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-label">// Work History</div>
+  <h2>On the Front Lines<br>of Cyber Defense</h2>
+
+  <div class="exp-item reveal">
+    <div class="exp-meta">
+      <div class="exp-period">Jan 2025 – Present</div>
+      <div class="exp-company">Citigroup</div>
+      <div class="exp-loc">USA</div>
+    </div>
+    <div class="exp-content">
+      <h3>Security Operations Center Analyst (L1)</h3>
+      <ul class="exp-bullets">
+        <li>Engineered advanced correlation rules in Splunk, reducing false positives by <strong>30%</strong> across <strong>1,000+ monthly alerts</strong>.</li>
+        <li>Orchestrated automated incident response playbooks in Splunk SOAR, slashing MTTR by <strong>40%</strong> for malware and phishing incidents.</li>
+        <li>Architected AWS GuardDuty ↔ on-premises SIEM integration, reducing mean time to detect (MTTD) by <strong>30%</strong>.</li>
+        <li>Implemented IAM security controls in CyberArk and Microsoft Entra ID, preventing <strong>25%</strong> of unauthorized access attempts.</li>
+        <li>Developed <strong>15+ custom detection rules</strong> aligned with MITRE ATT&CK, enhancing APT detection and threat hunting effectiveness.</li>
+        <li>Mentored 3 junior SOC analysts, increasing team productivity by <strong>15%</strong>.</li>
+      </ul>
+      <div class="exp-tags">
+        <span class="tag">Splunk</span><span class="tag">Splunk SOAR</span><span class="tag">AWS GuardDuty</span>
+        <span class="tag">CyberArk</span><span class="tag">Entra ID</span><span class="tag">MITRE ATT&CK</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-item reveal">
+    <div class="exp-meta">
+      <div class="exp-period">Aug 2022 – Nov 2023</div>
+      <div class="exp-company">Tata CLiQ</div>
+      <div class="exp-loc">India</div>
+    </div>
+    <div class="exp-content">
+      <h3>Security Operations Center Analyst (L1)</h3>
+      <ul class="exp-bullets">
+        <li>Automated log analysis via Python and Shell scripting, reducing manual effort by <strong>25%</strong> and improving IOC enrichment.</li>
+        <li>Led enterprise-wide CrowdStrike Falcon deployment across <strong>2,000+ endpoints</strong>, achieving <strong>95% coverage in 3 months</strong>.</li>
+        <li>Developed ransomware and phishing incident response playbooks, increasing response consistency by <strong>35%</strong>.</li>
+        <li>Conducted cloud posture assessments via CSPM tools, remediating <strong>60%</strong> of misconfigured AWS IAM policies and S3 buckets.</li>
+        <li>Fine-tuned Snort and Suricata IDS/IPS rules within Splunk, improving detection accuracy by <strong>25%</strong>.</li>
+        <li>Conducted malware analysis with Ghidra and Cuckoo Sandbox, accelerating threat containment by <strong>40%</strong>.</li>
+      </ul>
+      <div class="exp-tags">
+        <span class="tag">CrowdStrike Falcon</span><span class="tag">Python</span><span class="tag">Snort</span>
+        <span class="tag">Suricata</span><span class="tag">Ghidra</span><span class="tag">CSPM</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-item reveal">
+    <div class="exp-meta">
+      <div class="exp-period">Jan 2022 – Jul 2022</div>
+      <div class="exp-company">Vivma Software</div>
+      <div class="exp-loc">India</div>
+    </div>
+    <div class="exp-content">
+      <h3>IT Analyst — Intern</h3>
+      <ul class="exp-bullets">
+        <li>Implemented proactive infrastructure monitoring, reducing system downtime by <strong>15%</strong>.</li>
+        <li>Analyzed and optimized Snort and Suricata rules, increasing IDS/IPS accuracy by <strong>25%</strong> while reducing false positives.</li>
+        <li>Managed vulnerability program ensuring <strong>100% critical patch compliance</strong>.</li>
+        <li>Supported ISO 27001 certification readiness: access reviews, log retention, and user activity monitoring.</li>
+      </ul>
+      <div class="exp-tags">
+        <span class="tag">Snort</span><span class="tag">Suricata</span><span class="tag">ISO 27001</span><span class="tag">Vuln Management</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label">// Lab & Research</div>
+  <h2>Projects &<br>Personal Research</h2>
+  <div class="projects-grid">
+    <div class="project-card reveal">
+      <div class="project-num">01</div>
+      <h3>SOC Home Lab</h3>
+      <p>Fully functional SOC environment integrating Splunk & Elastic SIEM. Simulated APTs with Metasploit & Kali Linux. Network intrusion detection via Suricata and Security Onion.</p>
+      <div class="project-stack">
+        <span class="tag">Splunk</span><span class="tag">Elastic</span><span class="tag">Sysmon</span><span class="tag">Suricata</span><span class="tag">Kali Linux</span>
+      </div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-num">02</div>
+      <h3>Phishing Website Detection</h3>
+      <p>ML model detecting phishing URIs with <strong style="color:var(--yellow)">98.5% accuracy</strong> using SVM and Random Forest. Processes 1,000+ URLs/hour, cutting manual review by 70%.</p>
+      <div class="project-stack">
+        <span class="tag">Python</span><span class="tag">TensorFlow</span><span class="tag">Scikit-Learn</span><span class="tag">NLP</span>
+      </div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-num">03</div>
+      <h3>Project Trishul & Vuin Scan</h3>
+      <p>Automated pen-testing toolchain: reconnaissance + vulnerability scanning. Assessed 80+ endpoints for CVEs, misconfigs, and open ports. Integrated Nmap, Nikto, and custom scripts.</p>
+      <div class="project-stack">
+        <span class="tag">Python</span><span class="tag">Bash</span><span class="tag">Nmap</span><span class="tag">Nikto</span>
+      </div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-num">04</div>
+      <h3>TryHackMe & HackerOne</h3>
+      <p>Top <strong style="color:var(--yellow)">5% ranking</strong> on TryHackMe across 50+ rooms. Reported 3 valid vulnerabilities through HackerOne bug bounty — covering web app security, network pentesting, and digital forensics.</p>
+      <div class="project-stack">
+        <span class="tag">Bug Bounty</span><span class="tag">Web AppSec</span><span class="tag">Forensics</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-label">// Academic Background</div>
+  <h2>Education</h2>
+  <div class="edu-wrap reveal">
+    <div class="edu-card">
+      <div class="edu-degree">Master's Degree · Dec 2025</div>
+      <div class="edu-school">Pace University</div>
+      <div class="edu-field">Cybersecurity</div>
+    </div>
+    <div class="edu-card">
+      <div class="edu-degree">Bachelor's Degree · Jul 2022</div>
+      <div class="edu-school">Garden City University</div>
+      <div class="edu-field">Forensic Sciences</div>
+    </div>
+  </div>
+  <div class="reveal">
+    <div class="coursework-title">// Relevant Coursework</div>
+    <div class="course-grid">
+      <span class="course-chip">Network Security</span>
+      <span class="course-chip">Digital Forensics</span>
+      <span class="course-chip">Cloud Security</span>
+      <span class="course-chip">Security Architecture</span>
+      <span class="course-chip">Cyber Defense</span>
+      <span class="course-chip">Threat Intelligence</span>
+      <span class="course-chip">Ethical Hacking</span>
+      <span class="course-chip">Incident Response</span>
+      <span class="course-chip">Cryptography</span>
+      <span class="course-chip">Database Security</span>
+      <span class="course-chip">OS Internals</span>
+      <span class="course-chip">Security Compliance</span>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">// Get in Touch</div>
+  <div class="contact-grid">
+    <div class="reveal">
+      <h2>Let's Harden<br>Your Security<br>Posture.</h2>
+      <p class="contact-lead">
+        Open to <strong>SOC Analyst</strong>, <strong>Threat Detection Engineer</strong>, and <strong>Security Operations</strong> roles. I bring a proven track record of measurable impact and a passion for staying ahead of adversaries.
+      </p>
+      <a href="mailto:vamsisampangi@gmail.com" class="btn btn-primary">Send a message →</a>
+    </div>
+    <div class="reveal">
+      <div class="contact-links">
+        <a href="mailto:vamsisampangi@gmail.com" class="contact-link">
+          <span class="contact-link-icon">✉</span>
+          vamsisampangi@gmail.com
+        </a>
+        <a href="tel:7188012734" class="contact-link">
+          <span class="contact-link-icon">📞</span>
+          (718) 801-2734
+        </a>
+        <a href="https://www.linkedin.com/in/vamsi-sampangi-5604162a7" target="_blank" class="contact-link">
+          <span class="contact-link-icon">in</span>
+          linkedin.com/in/vamsi-sampangi
+        </a>
+        <a href="https://tryhackme.com" target="_blank" class="contact-link">
+          <span class="contact-link-icon">🎯</span>
+          TryHackMe — Top 5%
+        </a>
+        <a href="https://hackerone.com" target="_blank" class="contact-link">
+          <span class="contact-link-icon">🔓</span>
+          HackerOne — Bug Bounty Hunter
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-sig">Vamsi Sampangi</span>
+  <span>SOC Analyst · SIEM Specialist · Threat Hunter · 2025</span>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--red)' : '';
+    });
+  });
+</script>
+</body>
+</html>
